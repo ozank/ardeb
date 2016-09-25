@@ -1,0 +1,171 @@
+---
+title: "ARDEB Proje İstatistikleri"
+author: "Ozan Keysan"
+date: "23/08/2016"
+output:
+  html_document:
+    fig_height: 6
+    fig_width: 8
+    highlight: null
+    keep_md: yes
+    self_contained: no
+    smart: no
+    theme: null
+---
+
+TÜBİTAK geçtiğimiz haftalarda ARDEB projelerinin desteklenme oranları ve aktarılan bütçelerle ilgili bir [doküman](https://www.tubitak.gov.tr/sites/default/files/ardeb_stat_2016_12.pdf) yayınladı. Ancak bu doküman çok fikir vermediği için yayınlanan tablodaki verileri kullanarak, üniversitelerdeki proje istatistiklerini (biraz da çalıştığım kurum olan ODTÜ açısından) birkaç grafikle açıklamaya çalıştım. Kullandığım araçlar ve yöntemle ilgili detaylara yazının sonundan ulaşabilirsiniz.
+
+
+```{r, echo=FALSE, message=FALSE}
+library(ggplot2)
+library(ggthemes)
+library(directlabels)
+library(reshape2)
+require(knitr)
+
+ardeb <- read.csv("ardeb_stat_2016_12.csv")
+top_aktar <- head(ardeb[order(-ardeb$X2015_aktarilan), ],20)
+```
+
+
+## Önerilen-Desteklenen Proje Sayıları
+
+ARDEB programına önerilen proje sayılarında yıllara göre düzenli bir artış göze çarpıyor. Ancak, kabul edilen proje sayılarındaki artış daha yavaş kalmış. Hatta 2015 yılında 2014'e göre daha az sayıda proje kabul edilmiş. Bu yüzden 2011'de %25 olan kabul oranları, 2015'de %18'lere düşmüş.
+
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Şekil-1- Yıllara göre ARDEB'e sunulan ve kabul edilen proje sayıları.", fig.align='center'}
+#kabul oranları
+
+Oneri<-c(sum(ardeb$X2011_onerilen),sum(ardeb$X2012_onerilen),sum(ardeb$X2013_onerilen),sum(ardeb$X2014_onerilen),sum(ardeb$X2015_onerilen))
+Kabul<-c(sum(ardeb$X2011_desteklenen),sum(ardeb$X2012_desteklenen),sum(ardeb$X2013_desteklenen),sum(ardeb$X2014_desteklenen),sum(ardeb$X2015_desteklenen))
+Red<-Oneri-Kabul
+
+Yil<-c(2011,2012,2013,2014,2015)
+toplam_kabul<-data.frame(Yil, Kabul,Red)
+
+dfa <- melt(toplam_kabul,id.vars = "Yil")
+
+ggplot(dfa, aes(x=Yil, y=value,fill=variable))+ geom_bar(stat="identity")+theme_economist_white()+scale_fill_tableau()+geom_text(data=dfa, aes(x = Yil, y = value-600, label = paste0(value)), size=5,colour="white")+ylab("Proje Sayısı")+ylab("Proje Sayısı")+xlab("Yıllar")+ggtitle("Yıllara göre Önerilen Proje Sayıları")+theme(legend.position=c(.1,.9))+labs(fill="")
+
+```
+
+Önerilen ARDEB projelerinin üniversitelere göre dağılıma baktığımızda da benzer hemen her üniversitenin proje başvurusu sayısını arttırdığı gözlenebiliyor. Özellikle  Erciyes Üniversitesi'nin 4 yılda proje başvurularını yaklaşık 4 kart arttırması takdire şayan.
+
+2015 yılı proje başvuru sayısında birinciliği 423 proje ile Ege Üniversitesi alıyor. Hatta 2011 yılından beri bu pozisyonunu korumuş. Ancak Ege Üniversitesi 2015 yılında 423 proje önerisi vermişken, bu projelerin sadece 85 tanesi desteklenmiş. Halbuki Bilkent Üniversitesi Ege Üniversitesi'nin yarısı kadar proje başvurusu yapmasına rağmen, hemen hemen aynı sayıda projesi kabulu edilmiş. 
+
+ODTÜ'de de yıllara göre önerilen proje sayılarında bir artış gözlemlense de, diğer üniversitelere göre yeterince artmadığından, ODTÜ 2011 yılında önerilen proje sayısında 3. konumdayken, 2015 yılında 8.liğe gerilemiş durumda.
+
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Şekil-2- Önerilen proje sayılarının üniversiteler düzeyinde yıllara göre değişimi (2015'de 300'den fazla proje öneren üniversiteler arasında).", fig.align='center'}
+
+onerilen<-subset(ardeb, X2015_onerilen>299, select=c(universiteler,X2011_onerilen,X2012_onerilen,X2013_onerilen,X2014_onerilen,X2015_onerilen))
+
+onerilen<-onerilen[order(-onerilen$X2015_onerilen), ]
+dfa <- melt(onerilen)  #the function melt reshapes it from wide to long
+
+p<-ggplot(dfa, aes(x=variable, y=value)) + geom_line(aes(group=universiteler, colour=universiteler),size=1)+theme_gray()+scale_color_economist()+xlab("Yıllar")+ylab("Önerilen Proje Sayısı")+ggtitle("Önerilen Proje Sayıları")+scale_x_discrete(labels=c("2011","2012","2013","2014","2015"))
+
+direct.label(p,"angled.boxes")
+
+```
+
+
+Desteklenen proje sayılarına baktığımızda ise ilk sırayı 95 proje ile İTÜ'nün aldığını görüyoruz. ODTÜ'nün ise genel trende aykırı olarak 2015 yılında kabul edilen proje sayılarında sert bir düşüşle 7.liğe düştüğünü görüyoruz. Aynı dönemde proje başvuruları artmasına rağmen, kabul edilen proje sayısındaki bu düşüş kaygılandırıcı.
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Şekil-3- Desteklenen proje sayılarının üniversiteler düzeyinde yıllara göre değişimi (2015'de 60'dan fazla projesi desteklenen üniversiteler arasında).", fig.align='center'}
+
+desteklenen<-subset(ardeb, X2015_desteklenen>60, select=c(universiteler,X2011_desteklenen,X2012_desteklenen,X2013_desteklenen,X2014_desteklenen,X2015_desteklenen))
+
+desteklenen<-desteklenen[order(-desteklenen$X2015_desteklenen), ]
+dfa <- melt(desteklenen)  #the function melt reshapes it from wide to long
+
+
+p<-ggplot(dfa, aes(x=variable, y=value)) + geom_line(aes(group=universiteler, colour=universiteler),size=1)+theme_gray()+scale_color_economist()+xlab("Yıllar")+ylab("Desteklenen Proje Sayısı")+scale_x_discrete(labels=c("2011","2012","2013","2014","2015")) +ggtitle("Desteklenen Proje Sayıları")
+direct.label(p,"angled.boxes")
+
+```
+
+
+## Aktarılan Fon Miktarları
+
+2015 yılında en çok ARDEB fonu aktarılan üniversitelerde ilk sırayı yaklaşık 30 Milyon TL destek ile Bilkent Üniversitesi almış. Onu sırasıyla ODTÜ ve İTÜ takip ediyor.
+
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Şekil-4- 2015 yılında ARDEB'den en fazla destek alan 20 üniversite.", fig.align='center'}
+
+# Generate data
+ggplot(top_aktar, aes(x=reorder(universiteler, X2015_aktarilan), y=X2015_aktarilan/1e6))+ geom_bar(stat="identity")+ coord_flip()+theme_economist_white()+ylab("Milyon TL")+xlab("")+ggtitle("2015 Yılında Aktarılan Fon")+geom_bar(data=top_aktar[2,], aes(x=universiteler, y=X2015_aktarilan/1e6),  fill="red", stat="identity")
+                                                                                                                                                                                                                                                                                                                                              
+```
+
+```{r, echo=FALSE, message=FALSE}
+aktar_tablo<-subset(top_aktar, select=c(universiteler,X2015_aktarilan))
+aktar_tablo$X2015_aktarilan<-aktar_tablo$X2015_aktarilan/1e6
+kable(aktar_tablo, format = "html", digits = 1, booktabs=TRUE,row.names=FALSE,caption="Aktarılan Fon Miktarları(2015)", col.names = c("","Milyon TL"),align=c("l","r"))
+
+```
+
+
+### Toplam Fon 
+
+2011-2015 yılları arasında toplam aktarılan (enflasyona göre düzeltilmiş) proje fonlarına baktığımızda ise ilk üçteki sıralama gene aynı kalmış (Bilkent Ü., ODTÜ, İTÜ).
+
+
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Şekil-5- 2011-2015 yılları arasında ARDEB'den en fazla destek alan 20 üniversite (Enflasyona göre 2016 yılına dengelenmiş).", fig.align='center'}
+
+#Toplam aktarilan bütçe
+enflasyon<-1.09
+ardeb$toplam_aktarilan<-ardeb$X2011_aktarilan*enflasyon^5+ardeb$X2012_aktarilan*enflasyon^4+ardeb$X2013_aktarilan*enflasyon^3+ardeb$X2014_aktarilan*enflasyon^2+ardeb$X2015_aktarilan*enflasyon
+
+toplam_aktar <- head(ardeb[order(-ardeb$toplam_aktarilan), ],20)
+
+ggplot(toplam_aktar, aes(x=reorder(universiteler, toplam_aktarilan), y=(toplam_aktarilan)/1e6))+ geom_bar(stat="identity")+ coord_flip()+theme_economist_white()+ylab("Milyon TL")+xlab("")+ggtitle("2011-2015 Arasında Aktarılan Toplam Fon")+geom_bar(data=toplam_aktar[2,], aes(x=universiteler, y=toplam_aktarilan/1e6),  fill="red", stat="identity")
+```
+
+```{r, echo=FALSE, message=FALSE}
+toplam_aktar_tablo<-subset(toplam_aktar, select=c(universiteler,toplam_aktarilan))
+toplam_aktar_tablo$toplam_aktarilan<-toplam_aktar_tablo$toplam_aktarilan/1e6
+kable(toplam_aktar_tablo, format = "html", digits = 1, booktabs=TRUE,row.names=FALSE,caption="Toplam Aktarılan Fon Miktarı", col.names = c("","Milyon TL"),align=c("l","r"))
+
+```
+
+## Kabul oranları
+
+Üniversitelerin proje kabul oranlarını karşılaştırdığımızda ise ilgi çekici bir trendle karşılaşıyoruz. 2015 yılında proje kabul oranlarında birinciliği %40'lık bir oran ile Bilkent Üniversitesi almış. İlk üç sırada ise vakıf üniversiteleri (Bilkent, Sabancı, Koç) yer alıyor. Koç ve Sabancı Üniversitesi 2013 yılında %50 kabul oranının üstüne çıkmışlar. ODTÜ 2015 yılı öncesinde %30-40 bandıydayken, 2015 yılında %24 civarına gerilemiş durumda. Grafiklerde görünmese bile, Boğaziçi Üniversitesi de benzer bir trende sahip.
+
+En yüksek proje kabul oranına sahip üç üniversitenin de vakıf üniversitesi olması, bence proje yazım ve başvuru aşamalarında vakıf üniversitelerinin hocalarına sağladığı profosyonel destek hizmetleriyle açıklamak mümkün. Ancak sonuçta, ARDEB projeleri için verilen %50'lik kurum katkı payı düşünüldüğünde, devlet üniversitelerinin de proje başvuru ve yazım süreci için profesyonel bir destek mekanizması oluşturması daha amantıklı olacaktır.
+
+
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Şekil-6- Üniversiteler bazında projelerin kabul oranları (2015 yılında 10MTL'den fazla destek almış üniversiteler arasında).", fig.align='center'}
+
+#Destek Oranları
+
+ardeb$X2011_destek_orani<-100*ardeb$X2011_desteklenen/ardeb$X2011_onerilen
+ardeb$X2012_destek_orani<-100*ardeb$X2012_desteklenen/ardeb$X2012_onerilen
+ardeb$X2013_destek_orani<-100*ardeb$X2013_desteklenen/ardeb$X2013_onerilen
+ardeb$X2014_destek_orani<-100*ardeb$X2014_desteklenen/ardeb$X2014_onerilen
+ardeb$X2015_destek_orani<-100*ardeb$X2015_desteklenen/ardeb$X2015_onerilen
+
+destek_orani<-subset(ardeb, X2015_aktarilan>11000000, select=c(universiteler,X2011_destek_orani,X2012_destek_orani,X2013_destek_orani,X2014_destek_orani,X2015_destek_orani))
+
+dfa <- melt(destek_orani)  #the function melt reshapes it from wide to long
+p<-ggplot(dfa, aes(x=variable, y=value)) + geom_line(aes(group=universiteler, colour=universiteler),size=1)+theme_gray()+scale_color_colorblind()+xlab("Yıllar")+ylab("Desteklenme Oranı (%)")+scale_x_discrete(labels=c("2011","2012","2013","2014","2015"))
+direct.label(p,"angled.boxes")
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+destek_tablo<-subset(ardeb, X2015_aktarilan>5000000,select=c(universiteler,X2015_destek_orani))
+destek_tablo<-destek_tablo[with(destek_tablo, order(-X2015_destek_orani)), ]
+
+kable(destek_tablo, format = "html", digits = 1, booktabs=TRUE,row.names=FALSE,caption="Üniversite Bazında Proje Kabul Oranları(2015)", col.names = c("","Proje Kabul Oranı(%)"),align=c("l","c"))
+
+```
+
+## Teknik Detaylar
+
+Eğer aynı verileri kullanarak başka analizler yapmak isterseniz, hem [ARDEB proje istatistiklerinin excel haline](),  hem de bu grafikleri oluşturmak için kullanılan [kodlara]() [GitHub sayfamdan]() ulaşabilirsiniz. TÜBİTAK'ın yayınladığı tüm istatistiklere ise  [şu sayfadan](https://www.tubitak.gov.tr/tr/destekler/akademik/ulusal-destek-programlari/icerik-akademik-destek-istatistikleri) ulaşabilirsiniz.
+
+Bu analizdeki tüm grafikleri [R]()/[Rstudio]() kullanılarak hazırladım. Bu sayfadaki verilerin hiçbir haklı saklı değildir. Kaynak göstererek ya da göstermeyerek istediğiniz gibi paylaşabilirsiniz.
