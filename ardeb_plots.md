@@ -1,6 +1,6 @@
 # ARDEB Proje İstatistikleri
 Ozan Keysan  
-23/08/2016  
+25/09/2016  
 
 TÜBİTAK geçtiğimiz haftalarda ARDEB projelerinin desteklenme oranları ve aktarılan bütçelerle ilgili bir [doküman](https://www.tubitak.gov.tr/sites/default/files/ardeb_stat_2016_12.pdf) yayınladı. Ancak bu doküman çok fikir vermediği için yayınlanan tablodaki verileri kullanarak, üniversitelerdeki proje istatistiklerini (biraz da çalıştığım kurum olan ODTÜ açısından) birkaç grafikle açıklamaya çalıştım. Kullandığım araçlar ve yöntemle ilgili detaylara yazının sonundan ulaşabilirsiniz.
 
@@ -364,6 +364,6 @@ En yüksek proje kabul oranına sahip üç üniversitenin de vakıf üniversites
 
 ## Teknik Detaylar
 
-Eğer aynı verileri kullanarak başka analizler yapmak isterseniz, hem [ARDEB proje istatistiklerinin excel haline](),  hem de bu grafikleri oluşturmak için kullanılan [kodlara]() [GitHub sayfamdan]() ulaşabilirsiniz. TÜBİTAK'ın yayınladığı tüm istatistiklere ise  [şu sayfadan](https://www.tubitak.gov.tr/tr/destekler/akademik/ulusal-destek-programlari/icerik-akademik-destek-istatistikleri) ulaşabilirsiniz.
+Eğer aynı verileri kullanarak başka analizler yapmak isterseniz, hem [ARDEB proje istatistiklerinin excel haline](https://github.com/ozank/ardeb/blob/master/ardeb_stat_2016_12.xlsx?raw=true),  hem de bu grafikleri oluşturmak için kullanılan [kodlara]() [GitHub sayfamdan](https://github.com/ozank/ardeb) ulaşabilirsiniz. TÜBİTAK'ın yayınladığı tüm istatistiklere ise  [şu sayfadan](https://www.tubitak.gov.tr/tr/destekler/akademik/ulusal-destek-programlari/icerik-akademik-destek-istatistikleri) ulaşabilirsiniz.
 
-Bu analizdeki tüm grafikleri [R]()/[Rstudio]() kullanılarak hazırladım. Bu sayfadaki verilerin hiçbir haklı saklı değildir. Kaynak göstererek ya da göstermeyerek istediğiniz gibi paylaşabilirsiniz.
+Bu analizdeki tüm grafikleri [R](https://www.r-project.org/)/[Rstudio](https://www.rstudio.com/) kullanılarak hazırladım. Bu sayfadaki verilerin hiçbir haklı saklı değildir. Kaynak göstererek ya da göstermeyerek istediğiniz gibi paylaşabilirsiniz.
