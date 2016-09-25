@@ -4,8 +4,6 @@ author: "Ozan Keysan"
 date: "25/09/2016"
 output:
   html_document:
-    fig_height: 6
-    fig_width: 8
     highlight: null
     keep_md: yes
     self_contained: no
